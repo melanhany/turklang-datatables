@@ -16,17 +16,31 @@ class CategorySerializer(serializers.ModelSerializer):
         model = GrammaticCategory
         fields = ['id', 'en_name', 'ru_name']
 
-class ValueSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = GrammaticValue
-        fields = ['ru_name']
-
-class AffixalMorphSerializer(serializers.ModelSerializer):
-    gram_value = ValueSerializer()
-    language = LanguageSerializer()
+class SimpleAffixalSerializer(serializers.ModelSerializer):
+    language = serializers.StringRelatedField()
     class Meta:
         model = AffixalMorpheme
-        fields = ['id', 'name', 'gram_value', 'language']
+        fields = ['name', 'language']
+
+class ValueSerializer(serializers.ModelSerializer):
+    affixal_morphemes = SimpleAffixalSerializer(many=True)
+    value_name = serializers.SerializerMethodField('join_names')
+    class Meta:
+        model = GrammaticValue
+        fields = ['value_name', 'affixal_morphemes']
+    
+    def join_names (self, value):
+        return f'{value.en_name} : {value.ru_name}'
+        
+
+class AffixalMorphSerializer(serializers.ModelSerializer):
+    # gram_value = ValueSerializer()
+    # language = LanguageSerializer()
+    gram_value = serializers.StringRelatedField()
+    language = serializers.StringRelatedField()
+    class Meta:
+        model = AffixalMorpheme
+        fields = ['name', 'gram_value', 'language']
 
 class RootMorphSerializer(serializers.ModelSerializer):
     class Meta:

@@ -10,6 +10,10 @@ psycopg2 = "*"
 djangorestframework = "*"
 django-environ = "*"
 django-pivot = "*"
+django-debug-toolbar = "*"
+django-serverside-datatable = "*"
+pandas = "*"
+python-decouple = "*"
 
 [dev-packages]
 

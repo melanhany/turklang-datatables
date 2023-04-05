@@ -4,6 +4,9 @@ class Language(models.Model):
     id = models.BigIntegerField(primary_key=True, unique=True)
     name = models.CharField(max_length=255)
 
+    def __str__(self) -> str:
+        return self.name
+
 class Concept(models.Model):
     id = models.BigIntegerField(primary_key=True, unique=True)
     en_name = models.CharField(max_length=255, null=False, blank=False)
@@ -21,12 +24,17 @@ class GrammaticValue(models.Model):
     ru_name = models.CharField(max_length=255)
     category = models.ForeignKey(GrammaticCategory, on_delete=models.CASCADE, null=True)
 
+    def __str__(self) -> str:
+        return f'{self.en_name} : {self.ru_name}'
 class AffixalMorpheme(models.Model):
     id = models.BigIntegerField(primary_key=True, unique=True)
     name = models.CharField(max_length=255)
     #allomorph = models.CharField(max_length=255)
-    gram_value = models.ForeignKey(GrammaticValue, to_field='id', on_delete=models.CASCADE, null=True)
+    gram_value = models.ForeignKey(GrammaticValue, to_field='id', on_delete=models.CASCADE, null=True, related_name='affixal_morphemes')
     language = models.ForeignKey(Language, on_delete=models.CASCADE)
+
+    def __str__(self) -> str:
+        return self.name
 
 class RootMorpheme(models.Model):
     id = models.BigIntegerField(primary_key=True, unique=True)

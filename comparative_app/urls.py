@@ -3,7 +3,7 @@ from .views import GrammaticAffixalViewset, GrammaticValueViewset
 from rest_framework.routers import DefaultRouter
 
 urlpatterns = [
-        path('val/', GrammaticValueViewset.as_view()),
-        path('aff/', GrammaticAffixalViewset.as_view()),
+        path('grammatic-value/', GrammaticValueViewset.as_view()),
+        path('grammatic-affixal/', GrammaticAffixalViewset.as_view()),
 ]
 
