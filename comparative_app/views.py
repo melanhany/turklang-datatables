@@ -24,15 +24,15 @@ class GrammaticValueViewset(APIView):
         
         df = pd.json_normalize(json)
         df = pd.json_normalize(df.to_dict(orient="records"), meta=["value_name"], record_path="affixal_morphemes", record_prefix="affixal_")
-        df.head(10)
         df.fillna('!', inplace=True)
-        df = df.groupby(['value_name', 'affixal_language'], dropna=False)['affixal_name'].agg(affixal_name = '\\n'.join).reset_index()
+        df = df.groupby(['value_name', 'affixal_language'], dropna=False)['affixal_name'].agg(affixal_name = '\n'.join).reset_index()
 
         df = pd.pivot(df, values='affixal_name', index='value_name', columns='affixal_language')
         df.drop(columns='!', inplace=True)
         df.replace('!', np.nan, inplace=True)
+        df.replace(np.nan, '', inplace=True)
         df = df.reset_index()
-        good_json =  df.to_json(orient = "records", force_ascii = False)
+        good_json =  df.to_dict(orient='records')
         return good_json
 
 class GrammaticAffixalViewset(APIView):
