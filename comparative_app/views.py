@@ -1,20 +1,29 @@
 from django.shortcuts import render
+from django.http import HttpResponse
+from django.template import loader
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from .models import AffixalMorpheme, GrammaticValue
 from .serializers import AffixalMorphSerializer, ValueSerializer
-from .pagination import DefaultPagination
+from .pagination import PivotedDataPagination
 import pandas as pd
 import numpy as np
 
 class GrammaticValueViewset(APIView):
     serializer_class = ValueSerializer
+    pagination_class = PivotedDataPagination
 
-    def get(self, request, *args, **kwargs):
+    def get(self, request):
         queryset = GrammaticValue.objects.prefetch_related('affixal_morphemes__language').all()
+        paginator = self.pagination_class()
+
         serializer = self.serializer_class(queryset, many=True)
-        data = GrammaticValueViewset.pivot_json(serializer.data)
-        return Response(data)
+        pivoted_data = GrammaticValueViewset.pivot_json(serializer.data)
+        
+        paginated_data = paginator.paginate_queryset(pivoted_data, request)
+
+        return paginator.get_paginated_response(paginated_data)
+
     
     def pivot_json(data):
         json = data
@@ -32,8 +41,10 @@ class GrammaticValueViewset(APIView):
         df.replace('!', np.nan, inplace=True)
         df.replace(np.nan, '', inplace=True)
         df = df.reset_index()
-        good_json =  df.to_dict(orient='records')
+        good_json = df.to_dict(orient='records')
+        
         return good_json
+
 
 class GrammaticAffixalViewset(APIView):
     serializer_class = AffixalMorphSerializer
@@ -45,3 +56,6 @@ class GrammaticAffixalViewset(APIView):
         return Response(serializer.data)
     
 
+def base(request):
+
+    return render(request, "comparative_app/base.html")

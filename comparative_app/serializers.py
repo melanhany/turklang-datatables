@@ -25,10 +25,11 @@ class SimpleAffixalSerializer(serializers.ModelSerializer):
 class ValueSerializer(serializers.ModelSerializer):
     affixal_morphemes = SimpleAffixalSerializer(many=True)
     value_name = serializers.SerializerMethodField('join_names')
+    
     class Meta:
         model = GrammaticValue
         fields = ['value_name', 'affixal_morphemes']
-    
+
     def join_names (self, value):
         return f'{value.en_name} : {value.ru_name}'
         
