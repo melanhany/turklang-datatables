@@ -58,4 +58,4 @@ class GrammaticAffixalViewset(APIView):
 
 def base(request):
 
-    return render(request, "comparative_app/base.html")
+    return render(request, "comparative_app/gram_affixal_value.html")
