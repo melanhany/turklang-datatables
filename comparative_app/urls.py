@@ -1,9 +1,9 @@
 from django.urls import path
-from .views import GrammaticAffixalViewset, GrammaticValueViewset, base
+from .views import GrammaticAffixalViewset, GrammaticValueViewset, LanguagePivotViewset, base
 
 urlpatterns = [
-        path('grammatic-value/', GrammaticValueViewset.as_view()),
         path('grammatic-affixal/', GrammaticAffixalViewset.as_view()),
+        path('language/', LanguagePivotViewset.as_view()),
         path('index/', base)
 ]
 

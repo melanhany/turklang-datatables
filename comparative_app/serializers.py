@@ -1,29 +1,9 @@
 from rest_framework import serializers
 from .models import Language, Concept, GrammaticCategory, GrammaticValue, AffixalMorpheme, RootMorpheme
 
-class LanguageSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Language
-        fields = ['name']
-    
-class ConceptSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Concept
-        fields = ['id', 'en_name', 'ru_name']
-
-class CategorySerializer(serializers.ModelSerializer):
-    class Meta:
-        model = GrammaticCategory
-        fields = ['id', 'en_name', 'ru_name']
-
-class SimpleAffixalSerializer(serializers.ModelSerializer):
-    language = serializers.StringRelatedField()
-    class Meta:
-        model = AffixalMorpheme
-        fields = ['name', 'language']
 
 class ValueSerializer(serializers.ModelSerializer):
-    affixal_morphemes = SimpleAffixalSerializer(many=True)
+    # affixal_morphemes = SimpleAffixalSerializer(many=True)
     value_name = serializers.SerializerMethodField('join_names')
     
     class Meta:
@@ -35,15 +15,27 @@ class ValueSerializer(serializers.ModelSerializer):
         
 
 class AffixalMorphSerializer(serializers.ModelSerializer):
-    # gram_value = ValueSerializer()
-    # language = LanguageSerializer()
     gram_value = serializers.StringRelatedField()
-    language = serializers.StringRelatedField()
     class Meta:
         model = AffixalMorpheme
-        fields = ['name', 'gram_value', 'language']
+        fields = ['morph_name', 'gram_value']
+
+class LanguageSerializer(serializers.ModelSerializer):
+    affixal_morphemes = AffixalMorphSerializer(many=True)
+    class Meta:
+        model = Language
+        fields = ['name', 'affixal_morphemes']
 
 class RootMorphSerializer(serializers.ModelSerializer):
     class Meta:
         model = RootMorpheme
         fields = ['id', 'name', 'concept', 'language']
+
+class ConceptSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Concept
+        fields = ['id', 'en_name', 'ru_name']
+class CategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = GrammaticCategory
+        fields = ['id', 'en_name', 'ru_name']
