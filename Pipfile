@@ -17,6 +17,7 @@ python-decouple = "*"
 numpy = "*"
 django-pandas = "*"
 djangorestframework-datatables = "*"
+django-filter = "*"
 
 [dev-packages]
 

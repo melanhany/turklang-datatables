@@ -1,31 +1,37 @@
 from django.shortcuts import render
-from django.http import HttpResponse
-from django.template import loader
+from rest_framework_datatables.filters import DatatablesFilterBackend
+from rest_framework_datatables.django_filters.filterset import DatatablesFilterSet
+from rest_framework_datatables.renderers import DatatablesRenderer
+from rest_framework.generics import ListAPIView
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from .models import AffixalMorpheme, GrammaticValue, Language
 from .serializers import AffixalMorphSerializer, ValueSerializer, LanguageSerializer
 from .pagination import PivotedDataPagination
+from .filters import PivotedDataFilter
 import pandas as pd
 import numpy as np
 
-class LanguagePivotViewset(APIView):
+class LanguagePivotViewset(ListAPIView):
+    queryset = Language.objects.prefetch_related('affixal_morphemes__gram_value').all()
     serializer_class = LanguageSerializer
     pagination_class = PivotedDataPagination
-
-    def get(self, request):
-        queryset = Language.objects.prefetch_related('affixal_morphemes__gram_value').all()
+    filter_backends = [PivotedDataFilter]
+    
+    def list(self, request):
+        queryset = self.get_queryset()
         serializer = self.serializer_class(queryset, many=True)
         paginator = self.pagination_class()
+        filter_backend = PivotedDataFilter()
 
-        pivoted_data = LanguagePivotViewset.pivot_json(serializer.data)
-        paginated_data = paginator.paginate_queryset(pivoted_data, request)
+        pivoted_data = self.pivot_json(serializer.data)
+
+        filtered_data = filter_backend.filter_queryset(request, pivoted_data, self)
+        paginated_data = paginator.paginate_queryset(filtered_data, request)
         
-        # paginated_data = paginator.get_count_and_total_count(pivoted_data, GrammaticValueViewset)
-
         return paginator.get_paginated_response(paginated_data)
     
-    def pivot_json(jsonData):
+    def pivot_json(self, jsonData):
         for i, d in enumerate(jsonData):
             if not d['affixal_morphemes']:
                 jsonData[i]['affixal_morphemes'] = [{'morph_name': {}, 'gram_value': {}}]
