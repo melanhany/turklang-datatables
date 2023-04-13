@@ -1,7 +1,4 @@
 from django.shortcuts import render
-from rest_framework_datatables.filters import DatatablesFilterBackend
-from rest_framework_datatables.django_filters.filterset import DatatablesFilterSet
-from rest_framework_datatables.renderers import DatatablesRenderer
 from rest_framework.generics import ListAPIView
 from rest_framework.views import APIView
 from rest_framework.response import Response
