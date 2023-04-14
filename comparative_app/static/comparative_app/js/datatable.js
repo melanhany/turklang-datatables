@@ -5,7 +5,7 @@ function getDT(){
         processing: true,
         serverSide: true,
         ajax: {
-            url: '/api/language/?format=datatables',
+            url: '/api/affixal-value/?format=datatables',
             dataType: 'json',
             type: 'GET',
             // dataSrc: function(response) {
@@ -34,13 +34,12 @@ function getDT(){
         //     return cols;
         // },
         paging: true,
-        pageLength: 10,
+        lengthMenu: [10, 25, 50],
         lengthChange: true,
-        autoWidth: false,
+        autoWidth: true,
         searching: true,
-        // bInfo: true,
-        // bSort: true,
         scrollX: true,
+        fixedHeader: true,
         fixedColumns: {left: 1},
         stateSave: false, //saving state when updating page
     
@@ -89,6 +88,7 @@ function getDT(){
             "info": "Показано с _START_ по _END_ из _TOTAL_ записей",
             "infoFiltered":   "(отобрано из _MAX_ записей)",
             "search": "Поиск:",
+            "lengthMenu": "Показать _MENU_ записей",
             "paginate": {
                 "next": "Дальше",
                 "previous": "Назад"
@@ -97,8 +97,8 @@ function getDT(){
         
         "columnDefs": [
             {
-                "width": 30,
-                "targets": [0],
+                "targets": [0, 2, 3, 4, 5, 6, 7],
+                "className": "text-center",
                 "visible": true,
             },
             {
@@ -108,11 +108,25 @@ function getDT(){
             },
         ],
     
-        dom: 'lBfrtip',
+        dom: 
+            "<'ui grid'" +
+                "<'row'" +
+                    "<'top'l>" +
+                ">"+
+                "<'row'" +
+                    "<'left-mid'B><'right-mid'f>" +
+                ">"+
+                "<'row'" +
+                    "<'col-md-12'rt>" +
+                ">"+
+                "<'row'" +
+                    "<'left-mid'i><'right-mid'p>" +
+                ">"+
+            ">",
         buttons: [
         {
             extend: 'collection',
-            text: 'Сохранить как',
+            text: 'Сохранить',
             background: false,
             className: 'blue',
             buttons: [

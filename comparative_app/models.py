@@ -9,8 +9,8 @@ class Language(models.Model):
 
 class Concept(models.Model):
     id = models.BigIntegerField(primary_key=True, unique=True)
-    en_name = models.CharField(max_length=255, null=False, blank=False)
-    ru_name = models.CharField(max_length=255, null=False, blank=False)
+    en_name = models.CharField(max_length=255)
+    ru_name = models.CharField(max_length=255)
 
 class GrammaticCategory(models.Model):
     id = models.BigIntegerField(primary_key=True, unique=True)
@@ -39,7 +39,7 @@ class AffixalMorpheme(models.Model):
 class RootMorpheme(models.Model):
     id = models.BigIntegerField(primary_key=True, unique=True)
     name = models.CharField(max_length=255)
-    concept = models.ForeignKey(Concept, on_delete=models.CASCADE)
+    concept = models.ForeignKey(Concept, on_delete=models.CASCADE, null=True)
     language = models.ForeignKey(Language, on_delete=models.CASCADE)
 
     

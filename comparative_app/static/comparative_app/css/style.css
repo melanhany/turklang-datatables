@@ -1,4 +1,16 @@
 div.container {
+    margin-left:auto;
+    margin-right:auto;
     width: 70%;
-    font-size: 12px;
+    font-size: 14px;
+}
+
+div.left-mid{
+    float: left;
+    width: 50%;
+}
+
+div.right-mid{
+    float: right;
+    width: 50%;
 }
