@@ -1,24 +1,5 @@
 from rest_framework import serializers
-from .models import Language, Concept, GrammaticCategory, GrammaticValue, AffixalMorpheme, RootMorpheme
-
-
-class ValueSerializer(serializers.ModelSerializer):
-    # affixal_morphemes = SimpleAffixalSerializer(many=True)
-    value_name = serializers.SerializerMethodField('join_names')
-    
-    class Meta:
-        model = GrammaticValue
-        fields = ['value_name', 'affixal_morphemes']
-
-    def join_names (self, value):
-        return f'{value.en_name} : {value.ru_name}'
-
-class RootMorphSerializer(serializers.ModelSerializer):
-    concept = serializers.StringRelatedField()
-
-    class Meta:
-        model = RootMorpheme
-        fields = ['root_name', 'concept']
+from .models import Language, Concept, GrammaticCategory, GrammaticValue, AffixalMorpheme, RootMorpheme, RootConcept
 
 class AffixalMorphSerializer(serializers.ModelSerializer):
     gram_value = serializers.StringRelatedField()
@@ -32,17 +13,20 @@ class LanguageAffSerializer(serializers.ModelSerializer):
         model = Language
         fields = ['name', 'affixal_morphemes']
 
-class LanguageRootSerializer(serializers.ModelSerializer):
-    root_morphemes = RootMorphSerializer(many=True)
-
+class RootMorphSerializer(serializers.ModelSerializer):
+    language = serializers.StringRelatedField()
     class Meta:
-        model = Language
-        fields = ['name', 'root_morphemes']
+        model = RootMorpheme
+        fields = ['root_name', 'language']
 
-class ConceptSerializer(serializers.ModelSerializer):
+class RootConceptSerializer(serializers.ModelSerializer):
+    concept = serializers.StringRelatedField()
+    root = RootMorphSerializer()
     class Meta:
-        model = Concept
-        fields = ['id', 'en_name', 'ru_name']
+        model = RootConcept
+        fields = ['concept', 'root']
+
+
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = GrammaticCategory

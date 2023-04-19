@@ -2,8 +2,8 @@ from django.shortcuts import render
 from rest_framework.generics import ListAPIView
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from .models import AffixalMorpheme, Language
-from .serializers import AffixalMorphSerializer, LanguageAffSerializer, LanguageRootSerializer
+from .models import AffixalMorpheme, Language, RootConcept
+from .serializers import AffixalMorphSerializer, LanguageAffSerializer, RootConceptSerializer
 from .pagination import PivotedDataPagination
 from .filters import PivotedDataFilter
 import pandas as pd
@@ -47,9 +47,10 @@ class AffixalValueViewset(ListAPIView):
         return good_json
 
 
-class RootConceptViewset(ListAPIView):
-    queryset = Language.objects.prefetch_related('root_morphemes__concept').all()
-    serializer_class = LanguageRootSerializer
+class RootConcept(ListAPIView):
+    queryset = RootConcept.objects.prefetch_related('root__language')\
+                                  .prefetch_related('concept').all()
+    serializer_class = RootConceptSerializer
     pagination_class = PivotedDataPagination
     filter_backends = [PivotedDataFilter]
 
@@ -67,23 +68,14 @@ class RootConceptViewset(ListAPIView):
         return paginator.get_paginated_response(paginated_data)
 
     def pivot_json(self, jsonData):
-        for i, d in enumerate(jsonData):
-            if not d['root_morphemes']:
-                jsonData[i]['root_morphemes'] = [{'root_name': {}, 'concept': {}}]
-                
         df = pd.json_normalize(jsonData)
-        df = pd.json_normalize(df.to_dict(orient="records"), meta=["name"], record_path="root_morphemes")
-        df.fillna('!', inplace=True)
-        df = df.groupby(['name', 'concept'])['root_name'].agg(root_name = '<br>'.join).reset_index()
-        df = pd.pivot(df, values='root_name', index='concept', columns='name')
-        df.drop(index='!', inplace=True)
-        df.replace('!', np.nan, inplace=True)
+        df = df.groupby(['concept', 'root.language'])['root.root_name'].agg(root_name='<br>'.join).reset_index()
+        df = pd.pivot(df, values='root_name', index='concept', columns='root.language')
         df.replace(np.nan, '', inplace=True)
         df = df.reset_index()
         good_json = df.to_dict(orient='records')
         
         return good_json
-
 
 class GrammaticAffixalViewset(APIView):
     serializer_class = AffixalMorphSerializer
