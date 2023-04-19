@@ -46,7 +46,6 @@ class AffixalValueViewset(ListAPIView):
         
         return good_json
 
-
 class RootConcept(ListAPIView):
     queryset = RootConcept.objects.prefetch_related('root__language')\
                                   .prefetch_related('concept').all()
@@ -77,16 +76,9 @@ class RootConcept(ListAPIView):
         
         return good_json
 
-class GrammaticAffixalViewset(APIView):
-    serializer_class = AffixalMorphSerializer
-    
-    def get(self, request, *args, **kwargs):
-        queryset = AffixalMorpheme.objects. \
-                    prefetch_related("language", "gram_value").all()
-        serializer = self.serializer_class(queryset, many=True)
-        return Response(serializer.data)
-    
 
 def base(request):
-
-    return render(request, "comparative_app/gram_affixal_value.html")
+    if request.get_full_path() == '/affixal-value/':
+        return render(request, "comparative_app/gram_affixal_value.html")
+    elif request.get_full_path() == '/root-concept/':
+        return render(request, "comparative_app/root_concept.html")
