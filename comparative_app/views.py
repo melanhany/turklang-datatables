@@ -3,7 +3,7 @@ from rest_framework.generics import ListAPIView
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from .models import AffixalMorpheme, Language
-from .serializers import AffixalMorphSerializer, LanguageSerializer
+from .serializers import AffixalMorphSerializer, LanguageAffSerializer, LanguageRootSerializer
 from .pagination import PivotedDataPagination
 from .filters import PivotedDataFilter
 import pandas as pd
@@ -11,7 +11,7 @@ import numpy as np
 
 class AffixalValueViewset(ListAPIView):
     queryset = Language.objects.prefetch_related('affixal_morphemes__gram_value').all()
-    serializer_class = LanguageSerializer
+    serializer_class = LanguageAffSerializer
     pagination_class = PivotedDataPagination
     filter_backends = [PivotedDataFilter]
     
@@ -47,8 +47,42 @@ class AffixalValueViewset(ListAPIView):
         return good_json
 
 
-class ConceptMorphViewset(ListAPIView):
-    pass
+class RootConceptViewset(ListAPIView):
+    queryset = Language.objects.prefetch_related('root_morphemes__concept').all()
+    serializer_class = LanguageRootSerializer
+    pagination_class = PivotedDataPagination
+    filter_backends = [PivotedDataFilter]
+
+    def list(self, request):
+        queryset = self.get_queryset()
+        serializer = self.serializer_class(queryset, many=True)
+        paginator = self.pagination_class()
+        filter_backend = PivotedDataFilter()
+
+        pivoted_data = self.pivot_json(serializer.data)
+
+        filtered_data = filter_backend.filter_queryset(request, pivoted_data, self)
+        paginated_data = paginator.paginate_queryset(filtered_data, request)
+        
+        return paginator.get_paginated_response(paginated_data)
+
+    def pivot_json(self, jsonData):
+        for i, d in enumerate(jsonData):
+            if not d['root_morphemes']:
+                jsonData[i]['root_morphemes'] = [{'root_name': {}, 'concept': {}}]
+                
+        df = pd.json_normalize(jsonData)
+        df = pd.json_normalize(df.to_dict(orient="records"), meta=["name"], record_path="root_morphemes")
+        df.fillna('!', inplace=True)
+        df = df.groupby(['name', 'concept'])['root_name'].agg(root_name = '<br>'.join).reset_index()
+        df = pd.pivot(df, values='root_name', index='concept', columns='name')
+        df.drop(index='!', inplace=True)
+        df.replace('!', np.nan, inplace=True)
+        df.replace(np.nan, '', inplace=True)
+        df = df.reset_index()
+        good_json = df.to_dict(orient='records')
+        
+        return good_json
 
 
 class GrammaticAffixalViewset(APIView):

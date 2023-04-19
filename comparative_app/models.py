@@ -7,10 +7,6 @@ class Language(models.Model):
     def __str__(self) -> str:
         return self.name
 
-class Concept(models.Model):
-    id = models.BigIntegerField(primary_key=True, unique=True)
-    en_name = models.CharField(max_length=255)
-    ru_name = models.CharField(max_length=255)
 
 class GrammaticCategory(models.Model):
     id = models.BigIntegerField(primary_key=True, unique=True)
@@ -36,10 +32,29 @@ class AffixalMorpheme(models.Model):
     def __str__(self) -> str:
         return self.morph_name
 
+    
+class Concept(models.Model):
+    id = models.BigIntegerField(primary_key=True, unique=True)
+    en_name = models.CharField(max_length=255)
+    ru_name = models.CharField(max_length=255)
+    roots = models.ManyToManyField("RootMorpheme", 
+                                   through='RootConcept',
+                                   through_fields=('concept', 'root')
+                                   )
+
+    def __str__(self) -> str:
+        return f'{self.en_name} : {self.ru_name}'
+
 class RootMorpheme(models.Model):
     id = models.BigIntegerField(primary_key=True, unique=True)
-    name = models.CharField(max_length=255)
-    concept = models.ForeignKey(Concept, on_delete=models.CASCADE, null=True)
-    language = models.ForeignKey(Language, on_delete=models.CASCADE)
+    root_name = models.CharField(max_length=255)
+    language = models.ForeignKey(Language, on_delete=models.CASCADE, related_name='root_morphemes')
 
-    
+    def __str__(self) -> str:
+        return self.root_name
+
+class RootConcept(models.Model):
+    concept = models.ForeignKey(Concept, on_delete=models.CASCADE)
+    root = models.ForeignKey(RootMorpheme, on_delete=models.CASCADE)
+    pos = models.CharField(max_length=128)
+

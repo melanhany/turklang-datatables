@@ -36,7 +36,7 @@ function getDT(){
         paging: true,
         lengthMenu: [10, 25, 50],
         lengthChange: true,
-        autoWidth: true,
+        autoWidth: false,
         searching: true,
         scrollX: true,
         fixedHeader: true,
