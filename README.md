@@ -25,3 +25,5 @@ To run your application locally, run this inside the virtualenv:
 ```bash
 python manage.py runserver
 ```
+
+![Example of datatable](/example-datatable.png)
